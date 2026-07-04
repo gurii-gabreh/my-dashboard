@@ -117,6 +117,10 @@
     .card.peach::before  { background: rgba(250,179,135,0.04); }
     .card.peach:hover  { border-color: rgba(250,179,135,0.5); box-shadow: 0 16px 40px rgba(250,179,135,0.1); }
 
+    .card.red    { border-color: rgba(243,139,168,0.2); }
+    .card.red::before    { background: rgba(243,139,168,0.04); }
+    .card.red:hover    { border-color: rgba(243,139,168,0.5); box-shadow: 0 16px 40px rgba(243,139,168,0.1); }
+
     .card-icon {
       font-size: 36px;
       margin-bottom: 16px;
@@ -136,6 +140,7 @@
     .card.blue   .card-tag  { color: var(--blue); }
     .card.purple .card-tag  { color: var(--purple); }
     .card.peach  .card-tag  { color: var(--peach); }
+    .card.red    .card-tag  { color: var(--red); }
 
     .card-title {
       font-size: 20px;
@@ -168,6 +173,7 @@
     .card.blue   .card-btn { background: rgba(137,180,250,0.15); color: var(--blue); }
     .card.purple .card-btn { background: rgba(203,166,247,0.15); color: var(--purple); }
     .card.peach  .card-btn { background: rgba(250,179,135,0.15); color: var(--peach); }
+    .card.red    .card-btn { background: rgba(243,139,168,0.15); color: var(--red); }
 
     .footer {
       text-align: center;
@@ -191,8 +197,8 @@
 
   <div class="grid">
 
-    <!-- チラシ価格トラッカー -->
-    <a class="card green" href="https://gurii-gabreh.github.io/supermarket-price-tracker/" target="_blank" rel="noopener">
+    <!-- チラシ価格トラッカー：情報収集系→赤 -->
+    <a class="card red" href="https://gurii-gabreh.github.io/supermarket-price-tracker/" target="_blank" rel="noopener">
       <span class="card-icon">🛒</span>
       <span class="card-tag">PRICE TRACKER</span>
       <div class="card-title">チラシ価格トラッカー</div>
@@ -205,9 +211,9 @@
       </span>
     </a>
 
-    <!-- 食品価格一覧 -->
-    <a class="card blue" href="https://gurii-gabreh.github.io/supermarket-price-tracker/prices.html" target="_blank" rel="noopener">
-      <span class="card-icon">💰</span>
+    <!-- 食品価格一覧：情報収集系→赤、アイコン🥦 -->
+    <a class="card red" href="https://gurii-gabreh.github.io/supermarket-price-tracker/prices.html" target="_blank" rel="noopener">
+      <span class="card-icon">🥦</span>
       <span class="card-tag">PRICE LIST</span>
       <div class="card-title">食品価格一覧</div>
       <p class="card-desc">
@@ -219,13 +225,13 @@
       </span>
     </a>
 
-    <!-- CMDB学習アプリ -->
-    <a class="card purple" href="https://gurii-gabreh.github.io/cmdb-study-app/" target="_blank" rel="noopener">
+    <!-- 試験対策アプリ：学習系→青 -->
+    <a class="card blue" href="https://gurii-gabreh.github.io/study-app/" target="_blank" rel="noopener">
       <span class="card-icon">📚</span>
       <span class="card-tag">STUDY APP</span>
-      <div class="card-title">CMDB学習アプリ</div>
+      <div class="card-title">試験対策アプリ</div>
       <p class="card-desc">
-        ServiceNow CIS-DF（データ基盤）の試験対策アプリ。CMDBとCSDMの内容を中心に、問題演習・解説・メモ機能を備えた学習ツールです。
+        資格試験・検定の合格を目指す学習アプリ。問題演習・解説・メモ機能を備え、試験範囲を効率よく対策できます。
       </p>
       <span class="card-btn">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
@@ -233,13 +239,27 @@
       </span>
     </a>
 
-    <!-- Gemini API混雑モニター -->
-    <a class="card peach" href="https://gurii-gabreh.github.io/gemini-monitor/" target="_blank" rel="noopener">
+    <!-- Gemini API混雑モニター：分析系→緑 -->
+    <a class="card green" href="https://gurii-gabreh.github.io/gemini-monitor/" target="_blank" rel="noopener">
       <span class="card-icon">📊</span>
       <span class="card-tag">API MONITOR</span>
       <div class="card-title">Gemini API 混雑モニター</div>
       <p class="card-desc">
         Gemini APIの混雑状況をリアルタイムで監視。モデルごとの応答時間・ヒートマップ・時系列グラフで、最適なAPI利用タイミングを把握できます。
+      </p>
+      <span class="card-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        アプリを開く
+      </span>
+    </a>
+
+    <!-- 英会話アプリ：学習系→青 -->
+    <a class="card blue" href="https://gurii-gabreh.github.io/English-Speaking-App/" target="_blank" rel="noopener">
+      <span class="card-icon">💬</span>
+      <span class="card-tag">ENGLISH APP</span>
+      <div class="card-title">英会話アプリ</div>
+      <p class="card-desc">
+        AIと英会話の練習ができるアプリ。日常会話からビジネス英語まで、スピーキング力を手軽に鍛えられます。
       </p>
       <span class="card-btn">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
