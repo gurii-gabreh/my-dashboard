@@ -23,13 +23,40 @@
       --red:     #f38ba8;
     }
 
+    html, body { height: 100%; }
     body {
       background: var(--bg2);
       color: var(--text);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      min-height: 100vh;
-      padding: 40px 20px;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
     }
+
+    /* 上部タブ(🏠一覧 + 各アプリ)。別タブを開くのではなく、このタブでヘッダー下の
+       表示を切り替える(2026-08-10追加。progress-tracker-dashboardの
+       マネージャーアプリ/アプリ一覧タブと同じ仕組み)。 */
+    .top-tabs {
+      flex: 0 0 auto; display: flex; gap: 6px; padding: 10px 20px 0;
+      overflow-x: auto; background: var(--bg2);
+    }
+    .top-tab-btn {
+      flex: 0 0 auto; font-size: 12.5px; font-weight: 700; padding: 8px 16px;
+      border-radius: 10px 10px 0 0; border: 1px solid var(--border); border-bottom: none;
+      background: var(--bg3); color: var(--text3); cursor: pointer; white-space: nowrap;
+    }
+    .top-tab-btn.active { background: var(--bg); color: var(--text); }
+
+    #home-view {
+      display: none; flex: 1 1 auto; min-height: 0; overflow-y: auto;
+      flex-direction: column; padding: 30px 20px 40px;
+    }
+    #home-view.active { display: flex; }
+
+    #app-view { display: none; flex: 1 1 auto; min-height: 0; flex-direction: column; }
+    #app-view.active { display: flex; }
+    #app-iframe { flex: 1 1 auto; width: 100%; border: none; background: var(--bg); }
 
     .header {
       text-align: center;
@@ -159,15 +186,23 @@
     .card-btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       font-size: 13px;
       font-weight: 600;
       padding: 8px 16px;
       border-radius: 8px;
+      border: none;
+      font-family: inherit;
+      cursor: pointer;
+      text-decoration: none;
       transition: opacity 0.2s;
     }
+    .card-btn:hover { opacity: 0.8; }
 
-    .card:hover .card-btn { opacity: 0.8; }
+    .card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: -4px; }
+    .card-actions .card-btn { flex: 1 1 auto; }
+    .card-btn-inline { background: transparent !important; border: 1px solid currentColor !important; }
 
     .card.green  .card-btn { background: rgba(166,227,161,0.15); color: var(--lime); }
     .card.blue   .card-btn { background: rgba(137,180,250,0.15); color: var(--blue); }
@@ -182,12 +217,67 @@
       color: var(--text3);
     }
 
+    .card[role="button"]:focus-visible {
+      outline: 2px solid var(--purple);
+      outline-offset: 2px;
+    }
+
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px; z-index: 100;
+    }
+    .modal-overlay[hidden] { display: none; }
+    .modal-box {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 16px;
+      max-width: 560px; width: 100%; max-height: 85vh; display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px; border-bottom: 1px solid var(--border);
+    }
+    .modal-header h2 { font-size: 16px; font-weight: 700; color: var(--text); }
+    .modal-close {
+      background: none; border: none; color: var(--text3); font-size: 20px;
+      cursor: pointer; line-height: 1; padding: 4px;
+    }
+    .modal-close:hover { color: var(--text); }
+    .modal-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+    .modal-section-title { font-size: 12px; font-weight: 700; color: var(--purple); margin-bottom: 8px; letter-spacing: 1px; }
+    .modal-steps { padding-left: 20px; font-size: 13px; color: var(--text2); line-height: 1.8; }
+    .modal-steps li { margin-bottom: 4px; }
+    #tex-modal-textarea {
+      width: 100%; min-height: 220px; resize: vertical; background: var(--bg3);
+      color: var(--text2); border: 1px solid var(--border); border-radius: 10px;
+      padding: 12px; font-size: 12px; line-height: 1.6;
+      font-family: ui-monospace, "SF Mono", Consolas, monospace;
+    }
+    .modal-footer { padding: 14px 20px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; }
+    .modal-copy-btn {
+      font-size: 13px; font-weight: 700; padding: 9px 18px; border-radius: 8px;
+      border: none; background: rgba(203,166,247,0.15); color: var(--purple); cursor: pointer;
+    }
+    .modal-copy-btn:hover { opacity: 0.85; }
+    .modal-copy-btn.copied { background: rgba(166,227,161,0.15); color: var(--lime); }
+
     @media (max-width: 600px) {
       .grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
 <body>
+
+  <div class="top-tabs" id="top-tabs">
+    <button type="button" class="top-tab-btn active" data-tab="home">🏠 一覧</button>
+    <button type="button" class="top-tab-btn" data-tab="price-tracker">🛒 価格トラッカー</button>
+    <button type="button" class="top-tab-btn" data-tab="price-list">🥦 価格一覧</button>
+    <button type="button" class="top-tab-btn" data-tab="study-app">📚 試験対策</button>
+    <button type="button" class="top-tab-btn" data-tab="gemini-monitor">📊 API混雑</button>
+    <button type="button" class="top-tab-btn" data-tab="english-app">💬 英会話</button>
+  </div>
+
+  <div id="home-view" class="active">
 
   <div class="header">
     <div class="header-eyebrow">MY APPS</div>
@@ -198,80 +288,253 @@
   <div class="grid">
 
     <!-- チラシ価格トラッカー：情報収集系→赤 -->
-    <a class="card red" href="https://gurii-gabreh.github.io/supermarket-price-tracker/" target="_blank" rel="noopener">
+    <div class="card red">
       <span class="card-icon">🛒</span>
       <span class="card-tag">PRICE TRACKER</span>
       <div class="card-title">チラシ価格トラッカー</div>
       <p class="card-desc">
         近所のスーパーのチラシ情報を自動収集。住所を入力するだけで、複数スーパーの価格を一括比較できます。設定・収集・履歴管理が可能なメインアプリです。
       </p>
-      <span class="card-btn">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        アプリを開く
-      </span>
-    </a>
+      <div class="card-actions">
+        <a class="card-btn" href="https://gurii-gabreh.github.io/supermarket-price-tracker/" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          別タブで開く
+        </a>
+        <button type="button" class="card-btn card-btn-inline" onclick="showTab('price-tracker')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          この画面に表示
+        </button>
+      </div>
+    </div>
 
     <!-- 食品価格一覧：情報収集系→赤、アイコン🥦 -->
-    <a class="card red" href="https://gurii-gabreh.github.io/supermarket-price-tracker/prices.html" target="_blank" rel="noopener">
+    <div class="card red">
       <span class="card-icon">🥦</span>
       <span class="card-tag">PRICE LIST</span>
       <div class="card-title">食品価格一覧</div>
       <p class="card-desc">
         収集済みの価格データを閲覧・比較するページ。スーパー・カテゴリ・品種で絞り込みができ、品種別最安値モードでお得な買い物をサポートします。
       </p>
-      <span class="card-btn">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        アプリを開く
-      </span>
-    </a>
+      <div class="card-actions">
+        <a class="card-btn" href="https://gurii-gabreh.github.io/supermarket-price-tracker/prices.html" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          別タブで開く
+        </a>
+        <button type="button" class="card-btn card-btn-inline" onclick="showTab('price-list')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          この画面に表示
+        </button>
+      </div>
+    </div>
 
     <!-- 試験対策アプリ：学習系→青 -->
-    <a class="card blue" href="https://gurii-gabreh.github.io/study-app/" target="_blank" rel="noopener">
+    <div class="card blue">
       <span class="card-icon">📚</span>
       <span class="card-tag">STUDY APP</span>
       <div class="card-title">試験対策アプリ</div>
       <p class="card-desc">
         資格試験・検定の合格を目指す学習アプリ。問題演習・解説・メモ機能を備え、試験範囲を効率よく対策できます。
       </p>
-      <span class="card-btn">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        アプリを開く
-      </span>
-    </a>
+      <div class="card-actions">
+        <a class="card-btn" href="https://gurii-gabreh.github.io/study-app/" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          別タブで開く
+        </a>
+        <button type="button" class="card-btn card-btn-inline" onclick="showTab('study-app')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          この画面に表示
+        </button>
+      </div>
+    </div>
 
     <!-- Gemini API混雑モニター：分析系→緑 -->
-    <a class="card green" href="https://gurii-gabreh.github.io/gemini-monitor/" target="_blank" rel="noopener">
+    <div class="card green">
       <span class="card-icon">📊</span>
       <span class="card-tag">API MONITOR</span>
       <div class="card-title">Gemini API 混雑モニター</div>
       <p class="card-desc">
         Gemini APIの混雑状況をリアルタイムで監視。モデルごとの応答時間・ヒートマップ・時系列グラフで、最適なAPI利用タイミングを把握できます。
       </p>
-      <span class="card-btn">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        アプリを開く
-      </span>
-    </a>
+      <div class="card-actions">
+        <a class="card-btn" href="https://gurii-gabreh.github.io/gemini-monitor/" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          別タブで開く
+        </a>
+        <button type="button" class="card-btn card-btn-inline" onclick="showTab('gemini-monitor')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          この画面に表示
+        </button>
+      </div>
+    </div>
 
     <!-- 英会話アプリ：学習系→青 -->
-    <a class="card blue" href="https://gurii-gabreh.github.io/English-Speaking-App/" target="_blank" rel="noopener">
+    <div class="card blue">
       <span class="card-icon">💬</span>
       <span class="card-tag">ENGLISH APP</span>
       <div class="card-title">英会話アプリ</div>
       <p class="card-desc">
         AIと英会話の練習ができるアプリ。日常会話からビジネス英語まで、スピーキング力を手軽に鍛えられます。
       </p>
-      <span class="card-btn">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        アプリを開く
-      </span>
-    </a>
+      <div class="card-actions">
+        <a class="card-btn" href="https://gurii-gabreh.github.io/English-Speaking-App/" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          別タブで開く
+        </a>
+        <button type="button" class="card-btn card-btn-inline" onclick="showTab('english-app')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          この画面に表示
+        </button>
+      </div>
+    </div>
 
+    <!-- 文字起こし処理：常駐Webアプリではなく、Claude Codeの作業ルームに依頼して動かす
+         運用のため、他カードのようにURLへ飛ばず、依頼文・使い方をモーダルで見せる -->
+    <div class="card purple" role="button" tabindex="0" onclick="openTexModal()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTexModal();}">
+      <span class="card-icon">📝</span>
+      <span class="card-tag">TEXT EXTRACTION</span>
+      <div class="card-title">文字起こし処理</div>
+      <p class="card-desc">
+        Google Drive上のクイズ問題画像を読み取り、問題文・選択肢・正解をスプレッドシートへ書き出す処理です。常駐アプリではなく、Claude Codeの作業ルームに依頼して都度実行します。
+      </p>
+      <span class="card-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        依頼文・使い方を見る
+      </span>
+    </div>
+
+  </div>
+
+  <div class="modal-overlay" id="tex-modal-overlay" hidden>
+    <div class="modal-box">
+      <div class="modal-header">
+        <h2>📝 文字起こし処理(text-extraction)</h2>
+        <button type="button" class="modal-close" onclick="closeTexModal()" aria-label="閉じる">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-section">
+          <div class="modal-section-title">使い方</div>
+          <ol class="modal-steps">
+            <li>下の「依頼文をコピー」ボタンでテンプレートをコピーする</li>
+            <li>新しいClaude Codeセッション(作業ルーム)を開き、貼り付けて送信する</li>
+            <li>対象のGoogle Driveフォルダを聞かれたら伝える。認証情報(credentials/service_account.json、config.json)を求められたら、ローカルのファイルの中身をそのままチャットへ貼り付ける(ローカル専用ファイルのため、クラウド側の作業ルームは自力では読めない)</li>
+            <li>処理が完了したら、生成されたJSONをGAS経由でスプレッドシートへ反映する(GASコードのApps Scriptへの貼り付けは初回のみ必要)</li>
+            <li>結果は gurii-gabreh/progress-tracker-dashboard の依頼タスクタブ(data/tasks.json、TEX-〇〇〇)にも記録してもらう</li>
+          </ol>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-title">依頼文テンプレート</div>
+          <textarea id="tex-modal-textarea" readonly></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="modal-copy-btn" id="tex-modal-copy-btn" onclick="copyTexPrompt()">依頼文をコピー</button>
+      </div>
+    </div>
   </div>
 
   <div class="footer">
     © 2026 My Apps Dashboard
   </div>
 
+  </div>
+
+  <div id="app-view">
+    <iframe id="app-iframe" title="アプリ表示"></iframe>
+  </div>
+
+  <script>
+    // タブ切替(🏠一覧 / 各アプリ)。クリックしたアプリをiframeで表示し、ヘッダー下の
+    // 表示だけを差し替える(新規タブは開かない)。iframeのsrcは切り替えるたびに毎回
+    // 同じURLを再代入しないよう、直前に表示していたタブをdatasetで記憶しておく。
+    const APPS = {
+      "price-tracker": { url: "https://gurii-gabreh.github.io/supermarket-price-tracker/", title: "チラシ価格トラッカー" },
+      "price-list": { url: "https://gurii-gabreh.github.io/supermarket-price-tracker/prices.html", title: "食品価格一覧" },
+      "study-app": { url: "https://gurii-gabreh.github.io/study-app/", title: "試験対策アプリ" },
+      "gemini-monitor": { url: "https://gurii-gabreh.github.io/gemini-monitor/", title: "Gemini API 混雑モニター" },
+      "english-app": { url: "https://gurii-gabreh.github.io/English-Speaking-App/", title: "英会話アプリ" },
+    };
+
+    function showTab(key) {
+      document.querySelectorAll(".top-tab-btn").forEach((btn) => {
+        btn.classList.toggle("active", btn.dataset.tab === key);
+      });
+      const homeView = document.getElementById("home-view");
+      const appView = document.getElementById("app-view");
+      if (key === "home") {
+        homeView.classList.add("active");
+        appView.classList.remove("active");
+        return;
+      }
+      homeView.classList.remove("active");
+      appView.classList.add("active");
+      const iframe = document.getElementById("app-iframe");
+      const app = APPS[key];
+      if (iframe.dataset.loaded !== key) {
+        iframe.src = app.url;
+        iframe.title = app.title;
+        iframe.dataset.loaded = key;
+      }
+    }
+    document.querySelectorAll(".top-tab-btn").forEach((btn) => {
+      btn.addEventListener("click", () => showTab(btn.dataset.tab));
+    });
+
+    const TEX_PROMPT = [
+      "gurii-gabreh/text-extraction リポジトリで作業してほしい。",
+      "",
+      "【背景】",
+      "これまでローカル(Mac)のPythonスクリプト(batch.py)がclaude CLIをサブプロセスとして",
+      "呼び出し、画像(選択式クイズの問題画像)の文字起こしを行っていたが、CLIが原因不明の",
+      "エラーで失敗するようになったため、あなた自身の画像読み取り能力で直接処理する方式に",
+      "切り替えている。",
+      "",
+      "【進め方】",
+      "1. まずリポジトリ内 claude_pipeline/README.md (無ければ core/*.py 一式)を読み、",
+      "   現在のパイプライン構成(JSON出力→GAS→スプレッドシート反映の3点セット)を把握する",
+      "2. 対象のGoogle Driveフォルダ(URLは依頼者から指定してもらう)の画像を直接読み取り、",
+      "   question_number・question_text・choice_a〜d・answer を抽出する",
+      "3. 抽出結果をJSONにまとめて出力する",
+      "4. Google Drive/Sheetsへのアクセスにはservice_account.json等の認証情報が必要。",
+      "   このセッションはクラウド実行のため、ローカル専用のcredentials/service_account.json",
+      "   や実際のconfig.jsonの値を持っていない。依頼者にこのチャットへ内容を貼り付けて",
+      "   もらうか、別の受け渡し方法を確認してから進める",
+      "5. 完了したら、処理結果(成功件数・失敗件数・失敗理由)を報告する",
+      "",
+      "【進捗管理】",
+      "対応内容は gurii-gabreh/progress-tracker-dashboard の data/tasks.json",
+      "(text-extraction関連のタスク、ID: TEX-〇〇〇)にも反映されるよう、",
+      "マネージャールームへ報告してください。",
+    ].join("\n");
+
+    function openTexModal() {
+      document.getElementById("tex-modal-textarea").value = TEX_PROMPT;
+      document.getElementById("tex-modal-overlay").hidden = false;
+    }
+    function closeTexModal() {
+      document.getElementById("tex-modal-overlay").hidden = true;
+    }
+    document.getElementById("tex-modal-overlay").addEventListener("click", (e) => {
+      if (e.target.id === "tex-modal-overlay") closeTexModal();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeTexModal();
+    });
+
+    async function copyTexPrompt() {
+      const btn = document.getElementById("tex-modal-copy-btn");
+      const textarea = document.getElementById("tex-modal-textarea");
+      textarea.select();
+      let copied = false;
+      try {
+        await navigator.clipboard.writeText(TEX_PROMPT);
+        copied = true;
+      } catch (err) {
+        try { copied = document.execCommand("copy"); } catch (err2) { copied = false; }
+      }
+      btn.textContent = copied ? "コピーしました ✓" : "コピー不可(手動で選択してください)";
+      btn.classList.toggle("copied", copied);
+      setTimeout(() => { btn.textContent = "依頼文をコピー"; btn.classList.remove("copied"); }, 2000);
+    }
+  </script>
 </body>
 </html>
