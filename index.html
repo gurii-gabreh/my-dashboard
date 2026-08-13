@@ -276,6 +276,8 @@
     <button type="button" class="top-tab-btn" data-tab="study-app">📚 試験対策</button>
     <button type="button" class="top-tab-btn" data-tab="gemini-monitor">📊 API混雑</button>
     <button type="button" class="top-tab-btn" data-tab="english-app">💬 英会話</button>
+    <button type="button" class="top-tab-btn" data-tab="prompt-manager">✨ プロンプト管理</button>
+    <button type="button" class="top-tab-btn" data-tab="ai-tool-manager">🤖 AIツール収集</button>
   </div>
 
   <div id="home-view" class="active">
@@ -388,6 +390,46 @@
       </div>
     </div>
 
+    <!-- プロンプト管理：ナレッジ・生成系→桃(peach、他アプリと被らない未使用色) -->
+    <div class="card peach">
+      <span class="card-icon">✨</span>
+      <span class="card-tag">PROMPT MANAGER</span>
+      <div class="card-title">プロンプト管理</div>
+      <p class="card-desc">
+        参考プロンプトの自動収集と、プロンプトのナレッジ管理・生成を行うアプリ。
+      </p>
+      <div class="card-actions">
+        <a class="card-btn" href="https://gurii-gabreh.github.io/PROMPT-MANAGER/" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          別タブで開く
+        </a>
+        <button type="button" class="card-btn card-btn-inline" onclick="showTab('prompt-manager')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          この画面に表示
+        </button>
+      </div>
+    </div>
+
+    <!-- AIツール収集：情報収集系→赤 -->
+    <div class="card red">
+      <span class="card-icon">🤖</span>
+      <span class="card-tag">AI TOOL MANAGER</span>
+      <div class="card-title">AIツール収集</div>
+      <p class="card-desc">
+        既存のAIツール情報を収集・一覧化するアプリ。
+      </p>
+      <div class="card-actions">
+        <a class="card-btn" href="https://gurii-gabreh.github.io/ai-tool-manager/" target="_blank" rel="noopener">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          別タブで開く
+        </a>
+        <button type="button" class="card-btn card-btn-inline" onclick="showTab('ai-tool-manager')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="14" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/></svg>
+          この画面に表示
+        </button>
+      </div>
+    </div>
+
     <!-- 文字起こし処理：常駐Webアプリではなく、Claude Codeの作業ルームに依頼して動かす
          運用のため、他カードのようにURLへ飛ばず、依頼文・使い方をモーダルで見せる -->
     <div class="card purple" role="button" tabindex="0" onclick="openTexModal()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openTexModal();}">
@@ -453,6 +495,8 @@
       "study-app": { url: "https://gurii-gabreh.github.io/study-app/", title: "試験対策アプリ" },
       "gemini-monitor": { url: "https://gurii-gabreh.github.io/gemini-monitor/", title: "Gemini API 混雑モニター" },
       "english-app": { url: "https://gurii-gabreh.github.io/English-Speaking-App/", title: "英会話アプリ" },
+      "prompt-manager": { url: "https://gurii-gabreh.github.io/PROMPT-MANAGER/", title: "プロンプト管理" },
+      "ai-tool-manager": { url: "https://gurii-gabreh.github.io/ai-tool-manager/", title: "AIツール収集" },
     };
 
     function showTab(key) {
